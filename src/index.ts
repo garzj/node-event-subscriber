@@ -1,1 +1,3 @@
-console.log('Hello world');
+import { EventSubscriber } from './EventSubscriber';
+
+export { EventSubscriber };
