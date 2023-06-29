@@ -1,17 +1,38 @@
 {
-  "name": "event-subscriber",
+  "name": "@garzj/event-subscriber",
   "version": "1.0.0",
-  "description": "",
-  "main": "./build/index.js",
+  "description": "An event proxy allowing for easy removal of subscriptions on the EventEmitter class",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "build": "tsc -p .",
-    "start": "node ./build/index.js",
+    "start": "node ./lib/index.js",
     "test": "jest",
     "deploy": "npm run build && npm start",
     "dev": "export NODE_ENV=development || set NODE_ENV=development&& ts-node-dev --respawn ./src/index.ts"
   },
   "author": "Johannes Garz <johannes@garz.dev> (https://garz.dev/)",
   "license": "MIT",
+  "files": [
+    "/lib",
+    "/README.md",
+    "/LICENSE",
+    "/.npmignore"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garzj/node-event-subscriber.git"
+  },
+  "keywords": [
+    "event",
+    "events",
+    "emitter",
+    "subscriber"
+  ],
+  "bugs": {
+    "url": "https://github.com/garzj/node-event-subscriber/issues"
+  },
+  "homepage": "https://github.com/garzj/node-event-subscriber#readme",
   "dependencies": {
     "dotenv": "^16.3.1",
     "ts-node": "^10.9.1"

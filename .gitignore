@@ -2,7 +2,7 @@
 /data/
 
 # Build
-/build/
+/lib/
 
 # Env files
 .env
