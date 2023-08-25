@@ -1,6 +1,6 @@
 {
   "name": "@garzj/event-subscriber",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "An event proxy allowing for easy removal of subscriptions on the EventEmitter class",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
