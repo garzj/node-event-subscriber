@@ -6,10 +6,8 @@
   "types": "./lib/index.d.ts",
   "scripts": {
     "build": "tsc -p .",
-    "start": "node ./lib/index.js",
     "test": "jest",
-    "deploy": "npm run build && npm start",
-    "dev": "export NODE_ENV=development || set NODE_ENV=development&& ts-node-dev --respawn ./src/index.ts"
+    "deploy": "npm run build && npm start"
   },
   "author": "Johannes Garz <johannes@garz.dev> (https://garz.dev/)",
   "license": "MIT",
