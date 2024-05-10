@@ -77,7 +77,7 @@ export class EventSubscriber<L extends EventMap<L> = DefaultEventMap> {
     subs.set(listener, sub);
     this.eventSubs.set(event, subs);
 
-    this.emitter.on(event as any, sub.proxy);
+    (this.emitter.on as any)(event, sub.proxy);
   }
 
   private decSub<E extends keyof L>(event: E, listener: L[E]) {
@@ -89,6 +89,6 @@ export class EventSubscriber<L extends EventMap<L> = DefaultEventMap> {
       subs.delete(listener);
     }
 
-    this.emitter.off(event as any, sub.proxy);
+    (this.emitter.off as any)(event, sub.proxy);
   }
 }
