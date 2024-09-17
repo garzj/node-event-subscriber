@@ -1,6 +1,8 @@
 import EventEmitter = require('events');
 // @ts-ignore -- optional dependency
-import type { TypedEmitter } from 'tiny-typed-emitter';
+import type { TypedEmitter as _TinyTypedEmitter } from 'tiny-typed-emitter';
+// @ts-ignore -- optional dependency
+import type _TypedEmitter from 'typed-emitter';
 
 type AnyFunc = (...args: any[]) => any;
 
@@ -13,9 +15,17 @@ export type DefaultEventMap = {
 };
 
 // optional dependency: tiny-typed-emitter
-type Emitter<T extends DefaultEventMap> = any extends TypedEmitter
-  ? EventEmitter
-  : TypedEmitter<T> | EventEmitter;
+type TinyTypedEmitter<T extends DefaultEventMap> = any extends _TinyTypedEmitter
+  ? never
+  : _TinyTypedEmitter<T>;
+// optional dependency: typed-emitter
+type TypedEmitter<T extends DefaultEventMap> =
+  any extends _TypedEmitter<T> ? never : _TypedEmitter<T>;
+
+type Emitter<T extends DefaultEventMap> =
+  | TinyTypedEmitter<T>
+  | TypedEmitter<T>
+  | EventEmitter;
 
 type Subscription<F extends AnyFunc> = {
   count: number;

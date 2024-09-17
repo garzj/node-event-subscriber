@@ -2,11 +2,15 @@ import { describe, expect, jest, test } from '@jest/globals';
 import { EventMap, EventSubscriber } from './EventSubscriber';
 import { EventEmitter } from 'stream';
 // @ts-ignore -- optional dependency
-import type { TypedEmitter } from 'tiny-typed-emitter';
+import type { TypedEmitter as _TinyTypedEmitter } from 'tiny-typed-emitter';
+// @ts-ignore -- optional dependency
+import type _TypedEmitter from 'typed-emitter';
 
-type Emitter<T extends EventMap<T>> = any extends TypedEmitter
+type TinyTypedEmitter<T extends EventMap<T>> = any extends _TinyTypedEmitter
   ? EventEmitter
-  : TypedEmitter<T>;
+  : _TinyTypedEmitter<T>;
+type TypedEmitter<T extends EventMap<T>> =
+  any extends _TypedEmitter<T> ? EventEmitter : _TypedEmitter<T>;
 
 describe('event subscriber', () => {
   // Type check
@@ -15,10 +19,20 @@ describe('event subscriber', () => {
     write: (data: string) => boolean;
     close: () => void;
   };
-  const typed = new EventSubscriber(new EventEmitter() as Emitter<Events>);
+
+  const typed = new EventSubscriber(
+    new EventEmitter() as TinyTypedEmitter<Events>
+  );
   typed.on('close', () => {});
   typed.on('read', (data) => {});
   typed.on('write', (data) => true);
+
+  const typed2 = new EventSubscriber(
+    new EventEmitter() as TypedEmitter<Events>
+  );
+  typed2.on('close', () => {});
+  typed2.on('read', (data) => {});
+  typed2.on('write', (data) => true);
 
   const untyped = new EventSubscriber(new EventEmitter());
   untyped.on('definitely-not-garbage', (nice: number) => 420);

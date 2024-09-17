@@ -5,7 +5,9 @@ Proxies subscriptions to an EventEmitter and stores references, allowing for an 
 ## Features
 
 - TypeScript support
-- Optionally compatible with [tiny-typed-emitter](https://github.com/binier/tiny-typed-emitter)
+- Optionally compatible with
+  - [typed-emitter](https://github.com/binier/tiny-typed-emitter)
+  - [tiny-typed-emitter](https://github.com/binier/tiny-typed-emitter)
 
 ## Installation
 
