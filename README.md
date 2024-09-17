@@ -12,7 +12,7 @@ Proxies subscriptions to an EventEmitter and stores references, allowing for an 
 ## Installation
 
 ```bash
-npm i event-subscriber
+npm i @garzj/event-subscriber
 ```
 
 ## Usage

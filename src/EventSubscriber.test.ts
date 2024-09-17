@@ -37,7 +37,7 @@ describe('event subscriber', () => {
   const untyped = new EventSubscriber(new EventEmitter());
   untyped.on('definitely-not-garbage', (nice: number) => 420);
 
-  // Funcionality check
+  // Functionality check
   const em = new EventEmitter();
   const sub = new EventSubscriber(em);
 
