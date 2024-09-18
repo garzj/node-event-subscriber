@@ -19,7 +19,7 @@ npm i @garzj/event-subscriber
 
 ```ts
 import { EventEmitter } from 'events';
-import { EventSubscriber } from 'event-subscriber';
+import { EventSubscriber } from '@garzj/event-subscriber';
 
 const myEmitter = new EventEmitter();
 
