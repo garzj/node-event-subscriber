@@ -1,4 +1,4 @@
-# node-event-subscriber
+# @garzj/event-subscriber
 
 Proxies subscriptions to an EventEmitter and stores references, allowing for an easy removal.
 
