@@ -8,7 +8,7 @@ Proxies subscriptions to an EventEmitter and stores references, allowing for an 
 - Compatible with
   - [EventTarget](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget)
   - [EventEmitter](https://nodejs.org/en/learn/asynchronous-work/the-nodejs-event-emitter)
-  - [typed-emitter](https://github.com/binier/tiny-typed-emitter)
+  - [typed-emitter](https://github.com/andywer/typed-emitter)
   - [tiny-typed-emitter](https://github.com/binier/tiny-typed-emitter)
   - more...
 
