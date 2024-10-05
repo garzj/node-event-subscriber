@@ -1,22 +1,17 @@
 import { describe, expect, jest, test } from '@jest/globals';
-import { EventMap, EventSubscriber } from './EventSubscriber';
+import { EventSubscriber } from './EventSubscriber';
 import { EventEmitter } from 'stream';
-// @ts-ignore -- optional dependency
-import type { TypedEmitter as _TinyTypedEmitter } from 'tiny-typed-emitter';
-// @ts-ignore -- optional dependency
-import type _TypedEmitter from 'typed-emitter';
+import { type TypedEmitter as TinyTypedEmitter } from 'tiny-typed-emitter';
+import type TypedEmitter from 'typed-emitter';
 
-type TinyTypedEmitter<T extends EventMap<T>> = any extends _TinyTypedEmitter
-  ? EventEmitter
-  : _TinyTypedEmitter<T>;
-type TypedEmitter<T extends EventMap<T>> =
-  any extends _TypedEmitter<T> ? EventEmitter : _TypedEmitter<T>;
+type NotAny<T> = 0 extends 1 & T ? never : T;
 
 describe('event subscriber', () => {
   // Type check
   type Events = {
     read: (data: string) => void;
     write: (data: string) => boolean;
+    progress: (percentage: number) => string;
     close: () => void;
   };
 
@@ -24,18 +19,54 @@ describe('event subscriber', () => {
     new EventEmitter() as TinyTypedEmitter<Events>
   );
   typed.on('close', () => {});
-  typed.on('read', (data) => {});
-  typed.on('write', (data) => true);
+  typed.on('read', (data) => {
+    data satisfies NotAny<typeof data>;
+  });
+  typed.on('write', (data) => {
+    data satisfies string;
+    return true;
+  });
+  typed.on('progress', (percentage) => {
+    percentage satisfies number;
+    return `${percentage}%`;
+  });
+  typed.off('write');
+  typed.off();
+
+  const l1 = (data: string) => {};
+  const l2 = (percentage: number) => `${percentage}%`;
+  typed.on('read', l1);
+  typed.on('progress', l2);
+  // @ts-expect-error
+  typed.off('read', l2);
+  // @ts-expect-error
+  typed.off('progress', l1);
+  typed.off('read', l1);
+  typed.off('progress', l2);
 
   const typed2 = new EventSubscriber(
     new EventEmitter() as TypedEmitter<Events>
   );
   typed2.on('close', () => {});
-  typed2.on('read', (data) => {});
+  typed2.on('read', (data) => {
+    data satisfies NotAny<typeof data>;
+  });
   typed2.on('write', (data) => true);
 
+  interface X extends TypedEmitter<Events> {}
+  const typed3 = new EventSubscriber(new EventEmitter() as X);
+  typed3.on('read', (msg) => {
+    msg satisfies NotAny<typeof msg>;
+  });
+
   const untyped = new EventSubscriber(new EventEmitter());
-  untyped.on('definitely-not-garbage', (nice: number) => 420);
+  untyped.on('untyped-something', (nice: number) => 420);
+
+  const untyped2 = new EventSubscriber(new EventEmitter());
+  untyped2.on('untyped-any', (nice) => {
+    // @ts-expect-error
+    nice satisfies NotAny<typeof nice>;
+  });
 
   // Functionality check
   const em = new EventEmitter();
@@ -90,7 +121,7 @@ describe('event subscriber', () => {
   });
 
   test('returns itself', () => {
-    sub
+    (sub as any)
       .on('asdf', jest.fn())
       .on('alsdkfh', jest.fn())
       .once('lol', jest.fn())

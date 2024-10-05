@@ -1,75 +1,86 @@
-import EventEmitter = require('events');
-// @ts-ignore -- optional dependency
-import type { TypedEmitter as _TinyTypedEmitter } from 'tiny-typed-emitter';
-// @ts-ignore -- optional dependency
-import type _TypedEmitter from 'typed-emitter';
+type Subscription = {
+  count: number;
+  proxy: AnyFunc;
+};
+
+type Subs = Map<AnyFunc, Subscription>;
+
+type EventSubs = Map<keyof any, Subs>;
 
 type AnyFunc = (...args: any[]) => any;
 
-export type EventMap<E> = {
-  [k in keyof E]: AnyFunc;
-};
+type EditListener = (event: any, listener: AnyFunc) => any;
 
-export type DefaultEventMap = {
-  [k: string | symbol]: AnyFunc;
-};
+interface GenericEmitterO {
+  on: EditListener;
+  off: EditListener;
+}
+interface GenericEmitterEL {
+  addEventListener: EditListener;
+  removeEventListener: EditListener;
+}
+interface GenericEmitterOnce {
+  once: EditListener;
+}
 
-// optional dependency: tiny-typed-emitter
-type TinyTypedEmitter<T extends DefaultEventMap> = any extends _TinyTypedEmitter
-  ? never
-  : _TinyTypedEmitter<T>;
-// optional dependency: typed-emitter
-type TypedEmitter<T extends DefaultEventMap> =
-  any extends _TypedEmitter<T> ? never : _TypedEmitter<T>;
+type GenericEmitter = GenericEmitterO | GenericEmitterEL | GenericEmitterOnce;
 
-type Emitter<T extends DefaultEventMap> =
-  | TinyTypedEmitter<T>
-  | TypedEmitter<T>
-  | EventEmitter;
+type AddListener<E extends GenericEmitter> = E extends GenericEmitterEL
+  ? E['addEventListener']
+  : E extends GenericEmitterO
+    ? E['on']
+    : never;
 
-type Subscription<F extends AnyFunc> = {
-  count: number;
-  proxy: F;
-};
+type OnceListener<E extends GenericEmitter> = E extends GenericEmitterOnce
+  ? E['once']
+  : AddListener<E>;
 
-type Subs<L extends EventMap<L>, E extends keyof L> = Map<
-  L[E],
-  Subscription<L[E]>
->;
+type RemoveListener<E extends GenericEmitter> = E extends GenericEmitterEL
+  ? E['removeEventListener']
+  : E extends GenericEmitterO
+    ? E['off']
+    : never;
 
-type EventSubs<L extends EventMap<L>> = Map<keyof L, Subs<L, keyof L>>;
+export class EventSubscriber<
+  E extends GenericEmitter,
+  ON extends AddListener<E>,
+  ONCE extends OnceListener<E>,
+  OFF extends RemoveListener<E>,
+> {
+  private eventSubs: EventSubs = new Map();
 
-export class EventSubscriber<L extends EventMap<L> = DefaultEventMap> {
-  private eventSubs: EventSubs<L> = new Map();
+  constructor(public emitter: E) {}
 
-  constructor(public emitter: Emitter<L>) {}
-
-  on<E extends keyof L>(event: E, listener: L[E]): this {
+  on: ON = ((event, listener) => {
     const proxy = listener;
     this.incSub(event, listener, proxy);
     return this;
-  }
+  }) satisfies GenericEmitterO['on'] as any;
 
-  once<E extends keyof L>(event: E, listener: L[E]): this {
-    const proxy = ((...args: any[]) => {
+  once: ONCE = ((event: keyof any, listener: AnyFunc) => {
+    const proxy = (...args: any[]) => {
       this.decSub(event, listener);
       return listener(args);
-    }) as any;
+    };
     this.incSub(event, listener, proxy);
     return this;
-  }
+  }) satisfies GenericEmitterO['on'] as any;
 
-  off<E extends keyof L>(event?: E, listener?: L[E]): this {
+  off: OFF & {
+    (event: Parameters<OFF>[0]): E;
+    (): E;
+  } = ((event?: keyof any, listener?: AnyFunc) => {
     if (event !== undefined && !this.eventSubs.has(event)) return this;
-    const subsEntries: [keyof L, Subs<L, keyof L> | undefined][] = event
+    const subsEntries: [keyof any, Subs | undefined][] = event
       ? [[event, this.eventSubs.get(event)]]
       : [...this.eventSubs.entries()];
 
     for (const [event, subs] of subsEntries) {
       if (!subs) continue;
 
-      let subEntries: [L[keyof L], Subscription<L[keyof L]> | undefined][] =
-        listener ? [[listener, subs.get(listener)]] : [...subs.entries()];
+      let subEntries: [AnyFunc, Subscription | undefined][] = listener
+        ? [[listener, subs.get(listener)]]
+        : [...subs.entries()];
 
       for (const [l, _] of subEntries) {
         this.decSub(event, l);
@@ -77,20 +88,25 @@ export class EventSubscriber<L extends EventMap<L> = DefaultEventMap> {
     }
 
     return this;
-  }
+  }) satisfies GenericEmitterO['off'] as any;
 
   // proxy is cached for multiple subs on the same event & listener
-  private incSub<E extends keyof L>(event: E, listener: L[E], proxy: L[E]) {
-    const subs: Subs<L, E> = this.eventSubs.get(event) ?? new Map();
+  private incSub(event: keyof any, listener: AnyFunc, proxy: AnyFunc) {
+    const subs: Subs = this.eventSubs.get(event) ?? new Map();
     const sub = subs.get(listener) ?? { count: 0, proxy };
     sub.count++;
     subs.set(listener, sub);
     this.eventSubs.set(event, subs);
 
-    (this.emitter.on as any)(event, sub.proxy);
+    const e = this.emitter as any;
+    if (e.addEventListener) {
+      (this.emitter as GenericEmitterEL).addEventListener(event, sub.proxy);
+    } else if (e.on) {
+      (this.emitter as GenericEmitterO).on(event, sub.proxy);
+    }
   }
 
-  private decSub<E extends keyof L>(event: E, listener: L[E]) {
+  private decSub(event: keyof any, listener: AnyFunc) {
     const subs = this.eventSubs.get(event);
     if (!subs) return;
     const sub = subs.get(listener);
@@ -99,6 +115,11 @@ export class EventSubscriber<L extends EventMap<L> = DefaultEventMap> {
       subs.delete(listener);
     }
 
-    (this.emitter.off as any)(event, sub.proxy);
+    const e = this.emitter as any;
+    if (e.removeEventListener) {
+      (this.emitter as GenericEmitterEL).removeEventListener(event, sub.proxy);
+    } else if (e.off) {
+      (this.emitter as GenericEmitterO).off(event, sub.proxy);
+    }
   }
 }

@@ -5,9 +5,18 @@ Proxies subscriptions to an EventEmitter and stores references, allowing for an 
 ## Features
 
 - TypeScript support
-- Optionally compatible with
+- Compatible with
+  - [EventTarget](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget)
+  - [EventEmitter](https://nodejs.org/en/learn/asynchronous-work/the-nodejs-event-emitter)
   - [typed-emitter](https://github.com/binier/tiny-typed-emitter)
   - [tiny-typed-emitter](https://github.com/binier/tiny-typed-emitter)
+  - more...
+
+## Heads up
+
+Due to a TypeScript limitation (there does not seem to be a reliable way to remap return types of function overloads), methods of the `EventSubscriber` class may look like they return the original event emitter (they do not, the subscriber is returned).
+
+It's probably better to avoid chaines like `.on(a, b).on(c, d)` and prefer `sub.on(a, b); sub.on(c, d);` instead.
 
 ## Installation
 
