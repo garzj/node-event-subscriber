@@ -49,7 +49,7 @@ export class EventSubscriber<
 > {
   private eventSubs: EventSubs = new Map();
 
-  constructor(public emitter: E) {}
+  constructor(readonly emitter: E) {}
 
   on: ON = ((event, listener) => {
     const proxy = listener;

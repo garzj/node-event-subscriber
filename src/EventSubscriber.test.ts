@@ -128,4 +128,15 @@ describe('event subscriber', () => {
       .off('alsdkfh')
       .off();
   });
+
+  test('does not effect other subscriptions', () => {
+    const subFn = jest.fn();
+    const otherFn = jest.fn();
+    sub.on('test', subFn);
+    sub.emitter.on('test', otherFn);
+    sub.off();
+    sub.emitter.emit('test');
+    expect(subFn).not.toHaveBeenCalled();
+    expect(otherFn).toHaveBeenCalledTimes(1);
+  });
 });
