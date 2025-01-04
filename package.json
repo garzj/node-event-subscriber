@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc -p .",
     "test": "jest",
-    "deploy": "npm run build && npm start"
+    "deploy": "npm run build && npm start",
+    "ncu": "ncu -u"
   },
   "author": "Johannes Garz <johannes@garz.dev> (https://garz.dev/)",
   "license": "MIT",
@@ -33,11 +34,12 @@
   "homepage": "https://github.com/garzj/node-event-subscriber#readme",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
-    "@types/node": "^22.5.5",
+    "@types/node": "^22.10.5",
     "jest": "^29.7.0",
+    "npm-check-updates": "^17.1.13",
     "tiny-typed-emitter": "^2.1.0",
     "ts-jest": "^29.2.5",
     "typed-emitter": "^2.1.0",
-    "typescript": "^5.6.2"
+    "typescript": "^5.7.2"
   }
 }
