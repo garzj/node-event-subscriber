@@ -68,6 +68,13 @@ describe('event subscriber', () => {
     nice satisfies NotAny<typeof nice>;
   });
 
+  // Foreward type decleration
+  let subscriber: EventSubscriber<typeof process>;
+
+  subscriber = new EventSubscriber(process);
+  subscriber.on('exit', () => console.log('process exit'));
+  subscriber.off();
+
   // Functionality check
   const em = new EventEmitter();
   const sub = new EventSubscriber(em);

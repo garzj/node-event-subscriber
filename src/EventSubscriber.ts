@@ -41,23 +41,18 @@ type RemoveListener<E extends GenericEmitter> = E extends GenericEmitterEL
     ? E['off']
     : never;
 
-export class EventSubscriber<
-  E extends GenericEmitter,
-  ON extends AddListener<E>,
-  ONCE extends OnceListener<E>,
-  OFF extends RemoveListener<E>,
-> {
+export class EventSubscriber<E extends GenericEmitter> {
   private eventSubs: EventSubs = new Map();
 
   constructor(readonly emitter: E) {}
 
-  on: ON = ((event, listener) => {
+  on: AddListener<E> = ((event, listener) => {
     const proxy = listener;
     this.incSub(event, listener, proxy);
     return this;
   }) satisfies GenericEmitterO['on'] as any;
 
-  once: ONCE = ((event: keyof any, listener: AnyFunc) => {
+  once: OnceListener<E> = ((event: keyof any, listener: AnyFunc) => {
     const proxy = (...args: any[]) => {
       this.decSub(event, listener);
       return listener(args);
@@ -66,8 +61,8 @@ export class EventSubscriber<
     return this;
   }) satisfies GenericEmitterO['on'] as any;
 
-  off: OFF & {
-    (event: Parameters<OFF>[0]): E;
+  off: RemoveListener<E> & {
+    (event: Parameters<RemoveListener<E>>[0]): E;
     (): E;
   } = ((event?: keyof any, listener?: AnyFunc) => {
     if (event !== undefined && !this.eventSubs.has(event)) return this;
