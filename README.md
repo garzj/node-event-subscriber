@@ -24,7 +24,15 @@ It's probably better to avoid chaines like `.on(a, b).on(c, d)` and prefer `sub.
 npm i @garzj/event-subscriber
 ```
 
+or with yarn
+
+```bash
+yarn add @garzj/event-subscriber
+```
+
 ## Usage
+
+### Subscribe to events
 
 ```ts
 import { EventEmitter } from 'events';
@@ -43,11 +51,23 @@ sub.off();
 myEmitter.emit('my-event');
 ```
 
-## Output
+#### Output
 
 ```
 Always called!
 Always called!
 Temporarily called!
 Always called!
+```
+
+### Forward type decleration
+
+```ts
+import { EventSubscriber } from '@garzj/event-subscriber';
+
+let subscriber: EventSubscriber<typeof process>;
+
+subscriber = new EventSubscriber(process);
+subscriber.on('exit', () => console.log('process exit'));
+subscriber.off();
 ```
